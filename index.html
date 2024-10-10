@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat Personalizado ODS 4</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1ABC9C;
+      margin: 0;
+      padding: 0;
+    }
+    .header {
+      background-color: #16A085;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    .chat-container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+    #chat-messages {
+      background-color: #fff;
+      border-radius: 5px;
+      padding: 20px;
+      height: 300px;
+      overflow-y: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .chat-message {
+      margin-bottom: 15px;
+      display: flex;
+    }
+    .chat-message.user {
+      justify-content: flex-end;
+    }
+    .chat-message.assistant {
+      justify-content: flex-start;
+    }
+    .chat-message .message-content {
+      max-width: 70%;
+      padding: 10px 15px;
+      border-radius: 20px;
+    }
+    .chat-message.user .message-content {
+      background-color: #DCF8C6;
+      text-align: right;
+    }
+    .chat-message.assistant .message-content {
+      background-color: #F1F0F0;
+      text-align: left;
+    }
+    .chat-input-area {
+      display: flex;
+      margin-top: 10px;
+    }
+    .chat-input {
+      flex: 1;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      resize: none;
+      font-size: 16px;
+    }
+    .send-button {
+      background-color: #16A085;
+      color: #fff;
+      border: none;
+      padding: 0 20px;
+      margin-left: 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .about-section {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      line-height: 1.6;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .about-section h2 {
+      color: #16A085;
+      margin-top: 0;
+    }
+    .error-message {
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+      display: none;
+    }
+    .error-message-visible {
+      display: block;
+    }
+    @media (max-width: 600px) {
+      .chat-message .message-content {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Chat Personalizado ODS 4</h1>
+  </div>
+  <div class="chat-container">
+    <div id="chat-messages"></div>
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chat-input" placeholder="Digite sua mensagem aqui..."></textarea>
+      <button class="send-button" onclick="sendMessage()">Enviar</button>
+    </div>
+    <div id="error-message" class="error-message"></div>
+  </div>
+  <div class="about-section">
+    <h2>Sobre a ODS 4</h2>
+    <p>A ODS 4 visa garantir educação inclusiva, equitativa e de qualidade, promovendo oportunidades de aprendizagem ao longo da vida para todos.</p>
+    <p><strong>Principais objetivos:</strong></p>
+    <ul>
+      <li>Educação básica e secundária gratuita e de qualidade</li>
+      <li>Acesso equitativo à educação técnica, profissional e superior</li>
+      <li>Habilidades relevantes para o mercado de trabalho</li>
+      <li>Eliminar disparidades de gênero na educação</li>
+    </ul>
+  </div>
+  <div class="about-section">
+    <h2>Sobre a ONU</h2>
+    <p>A Organização das Nações Unidas é uma organização internacional fundada em 1945, com o objetivo de manter a paz e a segurança internacionais, desenvolver relações amistosas entre as nações e promover o progresso social.</p>
+    <p><strong>Fatos interessantes:</strong></p>
+    <ul>
+      <li>Possui 193 Estados-membros</li>
+      <li>Sede em Nova York, EUA</li>
+      <li>Secretário-Geral: António Guterres</li>
+      <li>Responsável pela Agenda 2030 e os 17 ODS</li>
+    </ul>
+  </div>
+  <script>
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const errorMessage = document.getElementById('error-message');
+
+    function sendMessage() {
+      const userMessage = chatInput.value.trim();
+      if (userMessage) {
+        addMessage('user', userMessage);
+        chatInput.value = '';
+        sendToAzureOpenAI(userMessage);
+      }
+    }
+
+    function addMessage(sender, message) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('chat-message', sender);
+
+      const messageContent = document.createElement('div');
+      messageContent.classList.add('message-content');
+      messageContent.textContent = message;
+
+      messageElement.appendChild(messageContent);
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function sendToAzureOpenAI(userMessage) {
+      const requestData = {
+        messages: [
+          { role: "user", content: userMessage }
+        ],
+        max_tokens: 800,
+        temperature: 0.7
+      };
+
+      fetch('https://alexa-m20y9agv-francecentral.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2023-03-15-preview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': '5f74eb8579e44d3db55d9548a13d7eb1' // Sua chave de API
+        },
+        body: JSON.stringify(requestData)
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          showErrorMessage(`Erro na requisição: ${response.status} - ${response.statusText}`);
+          throw new Error(`Erro na requisição: ${response.status} - ${response.statusText}`);
+        }
+      })
+      .then(data => {
+        addMessage('assistant', data.choices[0].message.content);
+        errorMessage.innerHTML = ''; // Limpa a mensagem de erro
+      })
+      .catch(error => {
+        console.error('Erro ao enviar a mensagem:', error);
+        showErrorMessage('Desculpe, houve um problema ao enviar sua mensagem. Tente novamente mais tarde.');
+      });
+    }
+
+    function showErrorMessage(message) {
+      errorMessage.classList.add('error-message-visible');
+      errorMessage.textContent = message;
+    }
+  </script>
+</body>
+</html>
